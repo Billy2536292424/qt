@@ -111,6 +111,14 @@
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
       <DynamicSource>output</DynamicSource>
     </QtMoc>
+    <QtRcc>
+      <QTDIR>C:\QT\QT5.5.1\5.5\MSVC2010</QTDIR>
+      <InputFile>%(FullPath)</InputFile>
+      <OutputFile>$(Configuration)\qrc_%(Filename).cpp</OutputFile>
+      <InitFuncName>icon</InitFuncName>
+      <Compression>default</Compression>
+      <ExecutionDescription>Rcc'ing %(Identity)...</ExecutionDescription>
+    </QtRcc>
     <QtUic>
       <QTDIR>C:\QT\QT5.5.1\5.5\MSVC2010</QTDIR>
       <InputFile>%(FullPath)</InputFile>
@@ -167,6 +175,14 @@
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
       <DynamicSource>output</DynamicSource>
     </QtMoc>
+    <QtRcc>
+      <QTDIR>C:\QT\QT5.5.1\5.5\MSVC2010</QTDIR>
+      <InputFile>%(FullPath)</InputFile>
+      <OutputFile>$(Configuration)\qrc_%(Filename).cpp</OutputFile>
+      <InitFuncName>icon</InitFuncName>
+      <Compression>default</Compression>
+      <ExecutionDescription>Rcc'ing %(Identity)...</ExecutionDescription>
+    </QtRcc>
     <QtUic>
       <QTDIR>C:\QT\QT5.5.1\5.5\MSVC2010</QTDIR>
       <InputFile>%(FullPath)</InputFile>
@@ -198,6 +214,12 @@
   <ItemGroup>
     <QtUic Include="mainwindow.ui">
     </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="1.png" />
+    <None Include="2.png" />
+    <QtRcc Include="icon.qrc">
+    </QtRcc>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

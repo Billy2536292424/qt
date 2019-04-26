@@ -18,11 +18,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 	setCentralWidget(m_view);//将view设置为中心小部件
 	m_view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);//阻止自动加人滚动条
-	m_view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	//view->setMouseTracking(true);
+	m_view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);//垂直的
 	m_scene->setSceneRect(0, 0, static_cast<QWidget *>(m_scene->parent())->size().width(), \
 		static_cast<QWidget *>(m_scene->parent())->size().height());
-
 	m_isRect = false;
 	m_isEllipse = false;
 	m_isDrawing = false;
@@ -30,7 +28,6 @@ MainWindow::MainWindow(QWidget *parent)
 	m_rotateCountR = 0;
 	m_isTurnLeft = false;
 	m_isTurnRight = false;
-	//this->setMouseTracking(true);
 	this->setWindowTitle("绘图系统");
 }
 
@@ -60,6 +57,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 		update();
 	}
 }
+
 void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 {
 	if (event->button() == Qt::LeftButton && m_isDrawing)
@@ -80,7 +78,6 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 		m_scene->addItem(rectItem);
 		m_isRect = false;
 		m_isDrawing = false;
-
 	}
 	if (m_isEllipse)
 	{
@@ -166,6 +163,5 @@ void MainWindow::on_action_5_triggered()
 {
 	//组合
 	PaintGroup *group = m_scene->createItemGroup(m_scene->selectedItems());
-	QList<QGraphicsItem *> items = group->childItems();
 	m_scene->addItem(group);
 }

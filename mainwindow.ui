@@ -44,8 +44,6 @@
     <property name="title">
      <string>插入</string>
     </property>
-    <addaction name="action"/>
-    <addaction name="action_2"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -71,14 +69,24 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="action"/>
+   <addaction name="action_2"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="action">
+   <property name="icon">
+    <iconset resource="icon.qrc">
+     <normaloff>:/images/1.png</normaloff>:/images/1.png</iconset>
+   </property>
    <property name="text">
     <string>矩形</string>
    </property>
   </action>
   <action name="action_2">
+   <property name="icon">
+    <iconset resource="icon.qrc">
+     <normaloff>:/images/2.png</normaloff>:/images/2.png</iconset>
+   </property>
    <property name="text">
     <string>椭圆</string>
    </property>
@@ -110,6 +118,8 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="icon.qrc"/>
+ </resources>
  <connections/>
 </ui>

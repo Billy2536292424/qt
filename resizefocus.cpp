@@ -1,10 +1,12 @@
 #include "resizefocus.h"
 #include <QCursor>
+#define ZEROPOSTOPARENTITEM 0
+#define ROTATIONPOSTOPARENTITEM -6
 
 ResizeFocus::ResizeFocus(qreal x, qreal y, PosInHost pos, QGraphicsItem *parent)
 	: QGraphicsRectItem(x, y, 6, 6, parent)
 	, m_posInHost(pos)
-	, m_wsize(6)
+	, m_size(6)
 {
 	setAcceptHoverEvents(true);//表示该项接收悬停事件
 	setVisible(false);//表示该项不可见鼠标事件直接通过不可见的项传递，并传递到后面的任何项，不可修改
@@ -15,7 +17,7 @@ ResizeFocus::ResizeFocus(qreal x, qreal y, PosInHost pos, QGraphicsItem *parent)
 ResizeFocus::ResizeFocus(qreal x, qreal y, qreal len, PosInHost pos, QGraphicsItem *parent)
 	: QGraphicsRectItem(x, y, len, len, parent)
 	, m_posInHost(pos)
-	, m_wsize(len)
+	, m_size(len)
 {
 	setAcceptHoverEvents(true);
 	setVisible(false);
@@ -75,43 +77,43 @@ void ResizeFocus::locateInHost()
 {
 	const QRectF parentRect = this->parentItem()->boundingRect();//返回该项父项的指针的边界矩形
 	qreal x = 0, y = 0;
-	switch(m_posInHost)
+	switch (m_posInHost)
 	{
 		case NORTH_MIDDLE:
-			x = parentRect.width() / 2 - m_wsize / 2;
-			y = 0;
+			x = parentRect.width() / 2 - m_size / 2;
+			y = ZEROPOSTOPARENTITEM;
 			break;
 		case SOUTH_MIDDLE:
-			x = parentRect.width() / 2 - m_wsize / 2;
-			y = parentRect.height() - m_wsize;
+			x = parentRect.width() / 2 - m_size / 2;
+			y = parentRect.height() - m_size;
 			break;
 		case EAST_MIDDLE:
-			x = parentRect.width() - m_wsize;
-			y = parentRect.height() / 2 - m_wsize / 2;
+			x = parentRect.width() - m_size;
+			y = parentRect.height() / 2 - m_size / 2;
 			break;
 		case WEST_MIDDLE:
-			x = 0;
-			y = parentRect.height() / 2 - m_wsize / 2;
+			x = ZEROPOSTOPARENTITEM;
+			y = parentRect.height() / 2 - m_size / 2;
 			break;
 		case NORTH_WEST:
-			x = 0;
-			y = 0;
+			x = ZEROPOSTOPARENTITEM;
+			y = ZEROPOSTOPARENTITEM;
 			break;
 		case SOUTH_EAST:
-			x = parentRect.width() - m_wsize;
-			y = parentRect.height() - m_wsize;
+			x = parentRect.width() - m_size;
+			y = parentRect.height() - m_size;
 			break;
 		case NORTH_EAST:
-			x = parentRect.width() - m_wsize;
-			y = 0;
+			x = parentRect.width() - m_size;
+			y = ZEROPOSTOPARENTITEM;
 			break;
 		case SOUTH_WEST:
-			x = 0;
-			y = parentRect.height() - m_wsize;
+			x = ZEROPOSTOPARENTITEM;
+			y = parentRect.height() - m_size;
 			break;
 		case NORTH_MIDDLE_UP:
-			x = parentRect.width() / 2 - m_wsize / 2;
-			y = -6;
+			x = parentRect.width() / 2 - m_size / 2;
+			y = ROTATIONPOSTOPARENTITEM;
 			break;
 		default:
 			break;

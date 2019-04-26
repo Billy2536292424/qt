@@ -8,7 +8,7 @@ class NodeRect : public QGraphicsItem
 {
 public:
 	enum MouseMode{MOVE, RESIZE};
-	enum {Type = UserType + 100};//65636
+	enum { NodeRectType = UserType + 100 };//65636
 
 	NodeRect(QGraphicsItem *parent = 0);
 	NodeRect(int x, int y, int width, int height, int margin, QGraphicsItem *parent = 0);
@@ -16,18 +16,19 @@ public:
 
 	void setValue(qreal width, qreal height);
 
-	virtual int type() const
+	virtual int type() const override
 	{
-		return Type;
+		return NodeRectType;
 	}
 
 	QRectF boundingRect() const;
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 	QPainterPath shape() const;
 protected:
-	void mousePressEvent(QGraphicsSceneMouseEvent *);
-	void mouseMoveEvent(QGraphicsSceneMouseEvent *);
-	void mouseReleaseEvent(QGraphicsSceneMouseEvent *);
+
+	void mousePressEvent(QGraphicsSceneMouseEvent *) override;
+	void mouseMoveEvent(QGraphicsSceneMouseEvent *) override;
+	void mouseReleaseEvent(QGraphicsSceneMouseEvent *) override;
 	void showResizeFocus(bool visible);
 
 private:
@@ -38,6 +39,11 @@ private:
 	int m_margin;
 	QRectF m_boundingRect;
 	void createResizeFocus();
+	void calculatedAngle();
+	void rotateNodeRect();
+	void changeSize(ResizeFocus::PosInHost pos, qreal curX, qreal curY, qreal curWidth, qreal curHeight,\
+	qreal hChanging, qreal wChanging);
+	void addResizeFocus(ResizeFocus::PosInHost pos);
 
 	MouseMode m_mode;
 	QColor m_color;

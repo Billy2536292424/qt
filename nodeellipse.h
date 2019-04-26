@@ -8,16 +8,16 @@ class NodeEllipse : public QGraphicsItem
 {
 public:
 	enum MouseMode {MOVE, RESIZE};
-	enum {Type = UserType + 101}; //65637
+	enum { NodeEllipseType = UserType + 101 }; //65637
 	//UserType自定义项(QGraphicsItem或任何标准项的子类)的最低允许类型值
 
 	NodeEllipse(QGraphicsItem *parent = 0);
 	NodeEllipse(int x, int y, int width, int height, int margin, QGraphicsItem *parent = 0);
 	~NodeEllipse();
 
-	virtual int type() const
+	virtual int type() const override
 	{
-		return Type;
+		return NodeEllipseType;
 	}
 
 	QRectF boundingRect() const;
@@ -28,9 +28,9 @@ public:
 
 protected:
 
-	void mousePressEvent(QGraphicsSceneMouseEvent *event);
-	void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-	void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+	void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+	void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+	void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 	void showResizeFocus(bool visible);
 
 private:
@@ -42,6 +42,11 @@ private:
 	int m_margin;
 	QRectF m_boundingRect;
 	void createResizeFocus();
+	void calculatedAngle();
+	void rotateNodeEllipse();
+	void changeSize(ResizeFocus::PosInHost pos, qreal curX, qreal curY, qreal curWidth, qreal curHeight, \
+		qreal hChanging, qreal wChanging);
+	void addResizeFocus(ResizeFocus::PosInHost pos);
 
 	MouseMode m_mode;
 	QColor m_color;

@@ -50,8 +50,14 @@ public:
         MainWindow->resize(400, 376);
         action = new QAction(MainWindow);
         action->setObjectName(QStringLiteral("action"));
+        QIcon icon;
+        icon.addFile(QStringLiteral(":/images/1.png"), QSize(), QIcon::Normal, QIcon::Off);
+        action->setIcon(icon);
         action_2 = new QAction(MainWindow);
         action_2->setObjectName(QStringLiteral("action_2"));
+        QIcon icon1;
+        icon1.addFile(QStringLiteral(":/images/2.png"), QSize(), QIcon::Normal, QIcon::Off);
+        action_2->setIcon(icon1);
         action_3 = new QAction(MainWindow);
         action_3->setObjectName(QStringLiteral("action_3"));
         action_4 = new QAction(MainWindow);
@@ -89,11 +95,11 @@ public:
         menuBar->addAction(menu->menuAction());
         menuBar->addAction(menu_2->menuAction());
         menuBar->addAction(menu_3->menuAction());
-        menu->addAction(action);
-        menu->addAction(action_2);
         menu_2->addAction(action_90);
         menu_2->addAction(action_91);
         menu_3->addAction(action_5);
+        mainToolBar->addAction(action);
+        mainToolBar->addAction(action_2);
 
         retranslateUi(MainWindow);
 

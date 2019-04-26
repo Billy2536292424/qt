@@ -12,22 +12,29 @@ NodeRect::NodeRect(QGraphicsItem *parent)
 	, m_width(0)
 	, m_height(0)
 	, m_margin(6)
+	, m_mode(MOVE)
+	, m_curResizeFocus(NULL)
+	, m_dashRect(NULL)
 	, m_isRotate(false)
 	, m_angle(0)
 	, m_count(0)
 	, QGraphicsItem(parent)
 {
-    setAcceptDrops(true);//接受拖放事件
-    setAcceptHoverEvents(true);//接受悬停事件
-    setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
-    createResizeFocus();
+	setAcceptDrops(true);//接受拖放事件
+	setAcceptHoverEvents(true);//接受悬停事件
+	setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
+	createResizeFocus();
 }
+
 NodeRect::NodeRect(int x, int y, int width, int height, int margin, QGraphicsItem *parent)
 	: m_xPos(x)
 	, m_yPos(y)
 	, m_width(width)
 	, m_height(height)
 	, m_margin(margin)
+	, m_mode(MOVE)
+	, m_curResizeFocus(NULL)
+	, m_dashRect(NULL)
 	, m_isRotate(false)
 	, m_angle(0)
 	, m_count(0)
@@ -59,17 +66,14 @@ void NodeRect::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 		fillColor = fillColor.darker(150);
 	if (option->state & QStyle::State_MouseOver)//指示小部件是否在鼠标下
 		fillColor = fillColor.lighter(125);
-	//painter->setCompositionMode(QPainter::CompositionMode_Exclusion);
+	painter->fillRect(m_xPos + m_margin, m_yPos + m_margin, m_width - m_margin * 2, m_height - m_margin * 2, fillColor);
+	painter->drawRect(m_xPos + m_margin, m_yPos + m_margin, m_width - m_margin * 2, m_height - m_margin * 2);
 	if (option->state & QStyle::State_Selected)
 	{
-		painter->fillRect(m_xPos + m_margin, m_yPos + m_margin, m_width - m_margin * 2, m_height - m_margin * 2, fillColor);
-		painter->drawRect(m_xPos + m_margin, m_yPos + m_margin, m_width - m_margin * 2, m_height - m_margin * 2);
 		showResizeFocus(true);
 	}
 	else
 	{
-		painter->fillRect(m_xPos + m_margin, m_yPos + m_margin, m_width - m_margin * 2, m_height - m_margin * 2, fillColor);
-		painter->drawRect(m_xPos + m_margin, m_yPos + m_margin, m_width - m_margin * 2, m_height - m_margin * 2);
 		showResizeFocus(false);
 	}
 }
@@ -84,7 +88,7 @@ QPainterPath NodeRect::shape() const
 void NodeRect::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
 	QTransform trans;
-	m_curResizeFocus = qgraphicsitem_cast<ResizeFocus *>(scene()->itemAt(event->scenePos(), trans));
+	m_curResizeFocus = qgraphicsitem_cast<ResizeFocus *>(scene()->itemAt(event->scenePos(), trans));//拿到焦点
 	if (m_curResizeFocus)
 	{
 		ResizeFocus::PosInHost pos = m_curResizeFocus->getInHost();
@@ -94,7 +98,6 @@ void NodeRect::mousePressEvent(QGraphicsSceneMouseEvent *event)
 			m_mode = MOVE;
 			m_startRotate = event->scenePos();
 			m_count = 0;
-			qDebug() << "startRotate" <<m_startRotate.x() << " " << m_startRotate.y();
 		}
 		else
 		{
@@ -106,7 +109,6 @@ void NodeRect::mousePressEvent(QGraphicsSceneMouseEvent *event)
 			m_dashRect->setPen(QPen(Qt::DashLine));
 			m_dashRect->setParentItem(this);
 			m_dashRect->setRect(m_xPos + m_margin, m_yPos + m_margin, m_width - m_margin * 2, m_height - m_margin * 2);
-
 		}
 	}
 	else
@@ -125,99 +127,23 @@ void NodeRect::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 		{
 			m_endRotate = event->scenePos();
 			m_centerRotate = boundingRect().center();
-			qDebug() << "endRotate" << m_endRotate.x() << " " << m_endRotate.y();
-			qDebug() << "centerRotate" << m_centerRotate.x() << " " << m_centerRotate.y();
-			qreal oneEdge = sqrt(pow(m_centerRotate.x() - m_startRotate.x(), 2) + \
-				pow(m_centerRotate.y() - m_startRotate.y(), 2));  //两点间距离公式
-			qreal otherEdge = sqrt(pow(m_centerRotate.x() - m_endRotate.x(), 2) + \
-				pow(m_centerRotate.y() - m_endRotate.y(), 2));
-			qreal oppositeSide = sqrt(pow(m_endRotate.x() - m_startRotate.x(), 2) + \
-				pow(m_endRotate.y() - m_startRotate.y(), 2));
-			qreal cosValue = (pow(oneEdge, 2) + pow(otherEdge, 2) - pow(oppositeSide, 2))\
-				/ (2 * oneEdge * otherEdge);//余弦定理
-			qreal angle = acos(cosValue);
-			angle = angle * 180 / 3.1415;
-			qreal dx1 = m_startRotate.x() - m_centerRotate.x();
-			qreal dy1 = m_startRotate.y() - m_centerRotate.y();
-			qreal dx2 = m_endRotate.x() - m_centerRotate.x();
-			qreal dy2 = m_endRotate.y() - m_centerRotate.y();
 			//qreal cosValue = (dx1 * dx2 + dy1 * dy2) / (oneEdge * otherEdge); //向量的点乘
 			//qreal angle = acos(cosValue);
-			
-			if (dx1 * dy2 - dy1 * dx2 > 0) //使用向量积判断旋转方向
-			{  //右转		顺时针
-				m_angle += fabs(angle);
-			}
-			else
-			{
-				//左转		逆时针
-				m_angle -= fabs(angle);
-			}
-
-			resetTransform();
-			QTransform transformf = transform();
-			qreal x = boundingRect().center().x();
-			qreal y = boundingRect().center().y();
-			transformf.translate(x, y);
-			transformf.rotate(m_angle, Qt::ZAxis);
-			
-			transformf.translate(-x, -y);
-			setTransform(transformf);
+			calculatedAngle();
+			rotateNodeRect();
 		}
 	}
 	else if (m_mode == RESIZE)
 	{
 		QPointF curPoint(event->scenePos());
 		qreal curX = m_xPos + m_margin, curY = m_yPos + m_margin, curWidth = m_width - m_margin * 2, curHeight = m_height - m_margin * 2;
-		qreal wChanging = curPoint.x() - m_lastPoint.x(),\
-				hChanging = curPoint.y() - m_lastPoint.y();
+		qreal wChanging = curPoint.x() - m_lastPoint.x(), \
+			hChanging = curPoint.y() - m_lastPoint.y();
 		ResizeFocus::PosInHost pos = m_curResizeFocus->getInHost();
-		switch (pos)
-		{
-			case ResizeFocus::NORTH_MIDDLE:
-				curY += hChanging;
-				curHeight -= hChanging;
-				break;
-			case ResizeFocus::SOUTH_MIDDLE:
-				curHeight += hChanging;
-				break;
-			case ResizeFocus::EAST_MIDDLE:
-				curWidth += wChanging;
-				break;
-			case ResizeFocus::WEST_MIDDLE:
-				curX += wChanging;
-				curWidth -= wChanging;
-				break;
-			case ResizeFocus::NORTH_WEST:
-				curX += wChanging;
-				curY += hChanging;
-				curWidth -= wChanging;
-				curHeight -= hChanging;
-				break;
-			case ResizeFocus::SOUTH_EAST:
-				curWidth += wChanging;
-				curHeight += hChanging;
-				break;
-			case ResizeFocus::NORTH_EAST:
-				curY += hChanging;
-				curWidth += wChanging;
-				curHeight -= hChanging;
-				break;
-			case ResizeFocus::SOUTH_WEST:
-				curX += wChanging;
-				curWidth -= wChanging;
-				curHeight += hChanging;
-				break;
-			default:
-				break;
-		}
-		if(curWidth < 20 || curHeight < 20)//minimal size
-			return;
-		m_dashRect->setRect(curX, curY, curWidth, curHeight);
+		changeSize(pos, curX, curY, curWidth, curHeight, wChanging, hChanging);
 	}
 	else
-		QGraphicsItem::mouseMoveEvent(event);
-		
+		QGraphicsItem::mouseMoveEvent(event);	
 }
 
 void NodeRect::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
@@ -235,6 +161,7 @@ void NodeRect::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 		QPoint curPos(curX, curY);
 		setPos(curPos);
 		delete m_dashRect;
+		m_dashRect = NULL;
 	}
 	else
 		QGraphicsItem::mouseReleaseEvent(event);
@@ -258,22 +185,104 @@ void NodeRect::setValue(qreal widthScale, qreal heightScale)
 
 void NodeRect::createResizeFocus()
 {
-	ResizeFocus *north_middle = new ResizeFocus(m_xPos, m_yPos, m_margin, ResizeFocus::NORTH_MIDDLE, this);
-	m_resizeFocus.append(north_middle);
-	ResizeFocus *north_east = new ResizeFocus(m_xPos, m_yPos, m_margin, ResizeFocus::NORTH_EAST, this);
-	m_resizeFocus.append(north_east);
-	ResizeFocus *north_west = new ResizeFocus(m_xPos, m_yPos, m_margin, ResizeFocus::NORTH_WEST, this);
-	m_resizeFocus.append(north_west);
-	ResizeFocus *south_middle = new ResizeFocus(m_xPos, m_yPos, m_margin, ResizeFocus::SOUTH_MIDDLE, this);
-	m_resizeFocus.append(south_middle);
-	ResizeFocus *south_east = new ResizeFocus(m_xPos, m_yPos, m_margin, ResizeFocus::SOUTH_EAST, this);
-	m_resizeFocus.append(south_east);
-	ResizeFocus *south_west = new ResizeFocus(m_xPos, m_yPos, m_margin, ResizeFocus::SOUTH_WEST, this);
-	m_resizeFocus.append(south_west);
-	ResizeFocus *east_middle = new ResizeFocus(m_xPos, m_yPos, m_margin, ResizeFocus::EAST_MIDDLE, this);
-	m_resizeFocus.append(east_middle);
-	ResizeFocus *west_middle = new ResizeFocus(m_xPos, m_yPos, m_margin, ResizeFocus::WEST_MIDDLE, this);
-	m_resizeFocus.append(west_middle);
-	ResizeFocus *north_middle_up = new ResizeFocus(m_xPos, m_yPos, m_margin, ResizeFocus::NORTH_MIDDLE_UP, this);
-	m_resizeFocus.append(north_middle_up);
+	addResizeFocus(ResizeFocus::NORTH_MIDDLE);
+	addResizeFocus(ResizeFocus::NORTH_EAST);
+	addResizeFocus(ResizeFocus::NORTH_WEST);
+	addResizeFocus(ResizeFocus::SOUTH_MIDDLE);
+	addResizeFocus(ResizeFocus::SOUTH_EAST);
+	addResizeFocus(ResizeFocus::SOUTH_WEST);
+	addResizeFocus(ResizeFocus::EAST_MIDDLE);
+	addResizeFocus(ResizeFocus::WEST_MIDDLE);
+	addResizeFocus(ResizeFocus::NORTH_MIDDLE_UP);
+}
+
+void NodeRect::calculatedAngle()
+{
+	qreal oneEdge = sqrt(pow(m_startRotate.x() - m_centerRotate.x(), 2) + \
+		pow(m_startRotate.y() - m_centerRotate.y(), 2));  //两点间距离公式
+	qreal otherEdge = sqrt(pow(m_endRotate.x() - m_centerRotate.x(), 2) + \
+		pow(m_endRotate.y() - m_centerRotate.y(), 2));
+	qreal oppositeSide = sqrt(pow(m_endRotate.x() - m_startRotate.x(), 2) + \
+		pow(m_endRotate.y() - m_startRotate.y(), 2));
+	qreal cosValue = (pow(oneEdge, 2) + pow(otherEdge, 2) - pow(oppositeSide, 2))\
+		/ (2 * oneEdge * otherEdge);//余弦定理
+	qreal angle = acos(cosValue);
+	qreal dx1 = m_startRotate.x() - m_centerRotate.x();
+	qreal dy1 = m_startRotate.y() - m_centerRotate.y();
+	qreal dx2 = m_endRotate.x() - m_centerRotate.x();
+	qreal dy2 = m_endRotate.y() - m_centerRotate.y();
+	if (dx1 * dy2 - dy1 * dx2 > 0) //使用向量积判断旋转方向 叉乘
+	{  //右转		顺时针
+		m_angle += fabs(angle);
+	}
+	else
+	{
+		//左转		逆时针
+		m_angle -= fabs(angle);
+	}
+}
+
+void NodeRect::rotateNodeRect()
+{
+	resetTransform();
+	QTransform transformf = transform();
+	qreal x = boundingRect().center().x();
+	qreal y = boundingRect().center().y();
+	transformf.translate(x, y);
+	transformf.rotate(m_angle, Qt::ZAxis);
+	transformf.translate(-x, -y);
+	setTransform(transformf);
+}
+
+void NodeRect::changeSize(ResizeFocus::PosInHost pos, qreal curX, qreal curY, qreal curWidth, qreal curHeight,\
+qreal wChanging, qreal hChanging)
+{
+	switch (pos)
+	{
+	case ResizeFocus::NORTH_MIDDLE:
+		curY += hChanging;
+		curHeight -= hChanging;
+		break;
+	case ResizeFocus::SOUTH_MIDDLE:
+		curHeight += hChanging;
+		break;
+	case ResizeFocus::EAST_MIDDLE:
+		curWidth += wChanging;
+		break;
+	case ResizeFocus::WEST_MIDDLE:
+		curX += wChanging;
+		curWidth -= wChanging;
+		break;
+	case ResizeFocus::NORTH_WEST:
+		curX += wChanging;
+		curY += hChanging;
+		curWidth -= wChanging;
+		curHeight -= hChanging;
+		break;
+	case ResizeFocus::SOUTH_EAST:
+		curWidth += wChanging;
+		curHeight += hChanging;
+		break;
+	case ResizeFocus::NORTH_EAST:
+		curY += hChanging;
+		curWidth += wChanging;
+		curHeight -= hChanging;
+		break;
+	case ResizeFocus::SOUTH_WEST:
+		curX += wChanging;
+		curWidth -= wChanging;
+		curHeight += hChanging;
+		break;
+	default:
+		break;
+	}
+	if (curWidth < 20 || curHeight < 20)//minimal size
+		return;
+	m_dashRect->setRect(curX, curY, curWidth, curHeight);
+}
+
+void NodeRect::addResizeFocus(ResizeFocus::PosInHost pos)
+{
+	ResizeFocus *focus = new ResizeFocus(m_xPos, m_yPos, m_margin, pos, this);
+	m_resizeFocus.append(focus);
 }

@@ -11,7 +11,7 @@ public:
 	ResizeFocus(qreal x, qreal y, qreal len, PosInHost pos, QGraphicsItem *parent);
 	~ResizeFocus();
 
-	int type() const
+	virtual int type() const override
 	{
 		return Type;
 	}
@@ -29,12 +29,13 @@ public:
 	void locateInHost();
 
 protected:
-	void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
-	void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
+
+	void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
+	void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
 
 private:
 	PosInHost m_posInHost;
-	qreal m_wsize;
+	qreal m_size;
 };
 
 #endif // RESIZEFOCUS_H

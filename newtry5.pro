@@ -30,4 +30,6 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui
 QT+=widgets
 
-RESOURCES +=
+RESOURCES += \
+    icon.qrc
+CONFIG+=c++11
